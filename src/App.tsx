@@ -1,4 +1,5 @@
 import React from 'react';
+import { ClockIcon, ChevronRightIcon } from '@heroicons/react/outline';
 import './App.scss';
 
 const baseUrl = 'https://johku.com/laguuni/fi_FI/products/6/availabletimes/'
@@ -34,19 +35,33 @@ const fetchForDate = async (date: string) => {
   return freeTimeSlots
 }
 
+const dates = [
+  'SUN',
+  'MON',
+  'TUE',
+  'WED',
+  'THU',
+  'FRI',
+  'SAT',
+]
 
 const Calendar = () => {
   const dateFromIndex = (index: number) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
-    return date.toISOString().substr(0, 10)
+    return date
   }
 
   const [dateIndexes, setDateIndexes] = React.useState([0, 1, 2, 3]);
 
   const dateStrings = React.useMemo(() => {
     return dateIndexes.map(dayId => {
-      return dateFromIndex(dayId)
+      const date = dateFromIndex(dayId);
+      return {
+        date: date.toISOString().substr(0, 10),
+        day: dates[date.getDay()],
+        formatted: `${date.getMonth()}/${date.getDay()}`,
+      }
     })
   }, [dateIndexes]);
 
@@ -64,7 +79,7 @@ const Calendar = () => {
   React.useEffect(() => {
     (async () => {
       for (const dateIndex in dateStrings) {
-        await fetchAndSetForDate(dateStrings[dateIndex])
+        await fetchAndSetForDate(dateStrings[dateIndex].date)
       }
     })()
   }, [])
@@ -74,44 +89,74 @@ const Calendar = () => {
     const newDateIndexes = [...dateIndexes, currentIndex + 1];
     setDateIndexes(newDateIndexes)
     console.log('settingDateIndexes', newDateIndexes)
-    fetchAndSetForDate(dateFromIndex(currentIndex + 1));
+    fetchAndSetForDate(dateFromIndex(currentIndex + 1).toISOString().substr(0, 10));
   }
 
-  return <div>
+  return <div
+    className={'table-container'}
+  >
     <table className={'main-table'}>
       <thead>
       <tr>
-        <th>Time</th>
+        <th>
+          <div className={'clock-container'}>
+            <ClockIcon className={'clock'}/>
+          </div>
+        </th>
         {dateStrings.map(dateString => {
-          return <th>{dateString}</th>
+          return <th>
+            <div className={'date-header'}>
+              <span>{dateString.day}</span>
+              <span>{dateString.formatted}</span>
+            </div>
+          </th>
         })}
-        <th></th>
+        {/*<th></th>*/}
       </tr>
 
       </thead>
       <tbody>
       {allTimes.map((timeString, index) => {
         return <tr>
-          <td>{timeString}</td>
+          <td>
+            <span className={'time-info'}>
+            {timeString}
+            </span>
+          </td>
           {dateStrings.map(dateString => {
-            const isLoaded = availabilityInfo[dateString] !== undefined
-            const availableSlots = availabilityInfo[dateString] && availabilityInfo[dateString][timeString];
-            return <td className={`free-${availableSlots}`}>
-              {isLoaded ? availableSlots : <div
+            const isLoaded = availabilityInfo[dateString.date] !== undefined
+            const availableSlots = availabilityInfo[dateString.date] && availabilityInfo[dateString.date][timeString];
+            return <td
+            >
+              <div className={'color-container'}>
+              {isLoaded ?
+                availableSlots > 0 &&
+                <span
+                  className={`color-indicator free-${availableSlots}`}
+                >
+                  {availableSlots }
+                </span>
+                : <div
                 className="lds-dual-ring"
               />}
+              </div>
             </td>
           })}
-          {index === 0 &&
-          <td rowSpan={allTimes.length}>
-            <button className={'more-button'} onClick={addDate}>More</button>
-          </td>
-          }
+          {/*{index === 0 &&*/}
+          {/*<td rowSpan={allTimes.length}>*/}
+          {/*  <button className={'more-button'} onClick={addDate}>More</button>*/}
+          {/*</td>*/}
+          {/*}*/}
         </tr>
       })}
       </tbody>
     </table>
-
+    <div className={'more-container'}>
+      <button className={'more-button'} onClick={addDate}>
+        Show More
+        <ChevronRightIcon className={'chevron'}/>
+      </button>
+    </div>
   </div>
 }
 
@@ -120,8 +165,8 @@ const App = () => {
 
   return (
     <div className="content">
-      <h1>Laguuni fixer</h1>
-      <span className={'main-info'}>Free slots for the pro cable during next X days.</span>
+      <h1 className={'main-header'}>FREE SLOTS</h1>
+      <span className={'location-info'}>@Lagguni ProCable</span>
       <Calendar/>
       <p>Made by Oskari Lehto</p>
       <p>Codes at <a href={'https://github.com/superosku/laguuni-fixer'}>github</a></p>
