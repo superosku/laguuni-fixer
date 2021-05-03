@@ -36,28 +36,46 @@ const fetchForDate = async (date: string) => {
 
 
 const Calendar = () => {
-
-  const dateStrings = [0, 1, 2, 3, 4, 5, 6].map(dayId => {
+  const dateFromIndex = (index: number) => {
     const date = new Date();
-    date.setDate(date.getDate() + dayId);
+    date.setDate(date.getDate() + index);
     return date.toISOString().substr(0, 10)
-  })
+  }
+
+  const [dateIndexes, setDateIndexes] = React.useState([0, 1, 2, 3]);
+
+  const dateStrings = React.useMemo(() => {
+    return dateIndexes.map(dayId => {
+      return dateFromIndex(dayId)
+    })
+  }, [dateIndexes]);
 
   const [availabilityInfo, setAvailabilityInfo] = React.useState<any>({});
+
+  const fetchAndSetForDate = async (date: string) => {
+    const dateInfo = await fetchForDate(date);
+    setAvailabilityInfo((oldInfo: any) => {
+      let newInfo = {...oldInfo};
+      newInfo[date] = dateInfo;
+      return newInfo
+    })
+  }
 
   React.useEffect(() => {
     (async () => {
       for (const dateIndex in dateStrings) {
-        const dateInfo = await fetchForDate(dateStrings[dateIndex]);
-        setAvailabilityInfo((oldInfo: any) => {
-          let newInfo = {...oldInfo};
-          newInfo[dateStrings[dateIndex]] = dateInfo;
-          return newInfo
-        })
+        await fetchAndSetForDate(dateStrings[dateIndex])
       }
     })()
   }, [])
 
+  const addDate = () => {
+    const currentIndex = dateIndexes[dateIndexes.length - 1]
+    const newDateIndexes = [...dateIndexes, currentIndex + 1];
+    setDateIndexes(newDateIndexes)
+    console.log('settingDateIndexes', newDateIndexes)
+    fetchAndSetForDate(dateFromIndex(currentIndex + 1));
+  }
 
   return <div>
     <table className={'main-table'}>
@@ -67,11 +85,12 @@ const Calendar = () => {
         {dateStrings.map(dateString => {
           return <th>{dateString}</th>
         })}
+        <th></th>
       </tr>
 
       </thead>
       <tbody>
-      {allTimes.map(timeString => {
+      {allTimes.map((timeString, index) => {
         return <tr>
           <td>{timeString}</td>
           {dateStrings.map(dateString => {
@@ -83,6 +102,11 @@ const Calendar = () => {
               />}
             </td>
           })}
+          {index === 0 &&
+          <td rowSpan={allTimes.length}>
+            <button className={'more-button'} onClick={addDate}>More</button>
+          </td>
+          }
         </tr>
       })}
       </tbody>
@@ -97,8 +121,11 @@ const App = () => {
   return (
     <div className="content">
       <h1>Laguuni fixer</h1>
-      <span className={'main-info'}>Free slots for the pro cable during next 7 days.</span>
+      <span className={'main-info'}>Free slots for the pro cable during next X days.</span>
       <Calendar/>
+      <p>Made by Oskari Lehto</p>
+      <p>Codes at <a href={'https://github.com/superosku/laguuni-fixer'}>github</a></p>
+      <p>Comments and suggestions to <a href={'https://github.com/superosku/laguuni-fixer/issues'}>github issues</a></p>
     </div>
   );
 }
