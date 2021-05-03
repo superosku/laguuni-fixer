@@ -1,12 +1,12 @@
 import React from 'react';
-import { ClockIcon, ChevronRightIcon } from '@heroicons/react/outline';
+import {ClockIcon, ChevronRightIcon} from '@heroicons/react/outline';
 import './App.scss';
 
 const baseUrl = 'https://johku.com/laguuni/fi_FI/products/6/availabletimes/'
 
 let allTimes: string[] = []
-for (let i = 0; i < 18; i ++) {
-  const timeString = `${i+6}.00`.padStart(5, '0')
+for (let i = 0; i < 18; i++) {
+  const timeString = `${i + 6}.00`.padStart(5, '0')
   allTimes.push(timeString)
 }
 
@@ -45,6 +45,10 @@ const dates = [
   'SAT',
 ]
 
+const dateToIsoNoTimezone = (date: Date) => {
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+}
+
 const Calendar = () => {
   const dateFromIndex = (index: number) => {
     const date = new Date();
@@ -55,14 +59,15 @@ const Calendar = () => {
   const [dateIndexes, setDateIndexes] = React.useState([0, 1, 2, 3]);
 
   const dateStrings = React.useMemo(() => {
-    return dateIndexes.map(dayId => {
+    const value = dateIndexes.map(dayId => {
       const date = dateFromIndex(dayId);
       return {
-        date: date.toISOString().substr(0, 10),
+        date: dateToIsoNoTimezone(date),
         day: dates[date.getDay()],
         formatted: `${date.getMonth()}/${date.getDate()}`,
       }
     })
+    return value
   }, [dateIndexes]);
 
   const [availabilityInfo, setAvailabilityInfo] = React.useState<any>({});
@@ -89,7 +94,7 @@ const Calendar = () => {
     const newDateIndexes = [...dateIndexes, currentIndex + 1];
     setDateIndexes(newDateIndexes)
     console.log('settingDateIndexes', newDateIndexes)
-    fetchAndSetForDate(dateFromIndex(currentIndex + 1).toISOString().substr(0, 10));
+    fetchAndSetForDate(dateToIsoNoTimezone(dateFromIndex(currentIndex + 1)));
   }
 
   return <div
@@ -129,16 +134,16 @@ const Calendar = () => {
             return <td
             >
               <div className={'color-container'}>
-              {isLoaded ?
-                availableSlots > 0 &&
-                <span
-                  className={`color-indicator free-${availableSlots}`}
-                >
-                  {availableSlots }
+                {isLoaded ?
+                  availableSlots > 0 &&
+                  <span
+                    className={`color-indicator free-${availableSlots}`}
+                  >
+                  {availableSlots}
                 </span>
-                : <div
-                className="lds-dual-ring"
-              />}
+                  : <div
+                    className="lds-dual-ring"
+                  />}
               </div>
             </td>
           })}
