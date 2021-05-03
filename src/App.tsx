@@ -60,7 +60,7 @@ const Calendar = () => {
       return {
         date: date.toISOString().substr(0, 10),
         day: dates[date.getDay()],
-        formatted: `${date.getMonth()}/${date.getDay()}`,
+        formatted: `${date.getMonth()}/${date.getDate()}`,
       }
     })
   }, [dateIndexes]);
