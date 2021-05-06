@@ -64,7 +64,7 @@ const Calendar = () => {
       return {
         date: dateToIsoNoTimezone(date),
         day: dates[date.getDay()],
-        formatted: `${date.getMonth()}/${date.getDate()}`,
+        formatted: `${date.getMonth() + 1}/${date.getDate()}`,
       }
     })
     return value
@@ -116,7 +116,6 @@ const Calendar = () => {
             </div>
           </th>
         })}
-        {/*<th></th>*/}
       </tr>
 
       </thead>
@@ -147,11 +146,6 @@ const Calendar = () => {
               </div>
             </td>
           })}
-          {/*{index === 0 &&*/}
-          {/*<td rowSpan={allTimes.length}>*/}
-          {/*  <button className={'more-button'} onClick={addDate}>More</button>*/}
-          {/*</td>*/}
-          {/*}*/}
         </tr>
       })}
       </tbody>
@@ -171,7 +165,7 @@ const App = () => {
   return (
     <div className="content">
       <h1 className={'main-header'}>FREE SLOTS</h1>
-      <span className={'location-info'}>@Lagguni ProCable</span>
+      <span className={'location-info'}>@Laguuni ProCable</span>
       <Calendar/>
       <p>Made by Oskari Lehto</p>
       <p>Codes at <a href={'https://github.com/superosku/laguuni-fixer'}>github</a></p>
