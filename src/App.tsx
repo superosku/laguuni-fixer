@@ -2,7 +2,7 @@ import React from 'react';
 import {ClockIcon, ChevronRightIcon} from '@heroicons/react/outline';
 import './App.scss';
 
-const baseUrl = 'https://johku.com/laguuni/fi_FI/products/6/availabletimes/'
+const baseUrl = 'https://johku.com/laguuni/fi_FI/products'
 
 let allTimes: string[] = []
 for (let i = 0; i < 18; i++) {
@@ -11,15 +11,15 @@ for (let i = 0; i < 18; i++) {
 }
 
 
-const fetchForDateAndCount = async (date: string, count: string) => {
-  const url = baseUrl + date + '.json?count=' + count;
+const fetchForDateAndCount = async (date: string, count: string, cableId: number) => {
+  const url = `${baseUrl}/${cableId}/availabletimes/${date}.json?count=${count}`
   const response = await fetch(url)
   const responseJson = await response.json()
   return responseJson.starttimes
 }
 
 
-const fetchForDate = async (date: string) => {
+const fetchForDate = async (date: string, cableId: number) => {
   let freeTimeSlots: any = {}
   for (const timeIndex in allTimes) {
     freeTimeSlots[allTimes[timeIndex]] = 0
@@ -27,7 +27,9 @@ const fetchForDate = async (date: string) => {
 
   const slotsToCheck = [1, 2, 3, 4]
   for (const slotIndex in slotsToCheck) {
-    const validStartTimes = await fetchForDateAndCount(date, slotsToCheck[slotIndex].toString())
+    const validStartTimes = await fetchForDateAndCount(
+      date, slotsToCheck[slotIndex].toString(), cableId
+    )
     for (const startTimeIndex in validStartTimes) {
       freeTimeSlots[validStartTimes[startTimeIndex]] = slotsToCheck[slotIndex];
     }
@@ -49,14 +51,18 @@ const dateToIsoNoTimezone = (date: Date) => {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 }
 
-const Calendar = () => {
+interface ICalendarProps {
+  cableId: number
+}
+
+const Calendar = ({ cableId }: ICalendarProps) => {
   const dateFromIndex = (index: number) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
     return date
   }
 
-  const [dateIndexes, setDateIndexes] = React.useState([0, 1, 2, 3]);
+  const [dateIndexes, setDateIndexes] = React.useState([0, 1, 2, 3, 4]);
 
   const dateStrings = React.useMemo(() => {
     const value = dateIndexes.map(dayId => {
@@ -73,7 +79,7 @@ const Calendar = () => {
   const [availabilityInfo, setAvailabilityInfo] = React.useState<any>({});
 
   const fetchAndSetForDate = async (date: string) => {
-    const dateInfo = await fetchForDate(date);
+    const dateInfo = await fetchForDate(date, cableId);
     setAvailabilityInfo((oldInfo: any) => {
       let newInfo = {...oldInfo};
       newInfo[date] = dateInfo;
@@ -161,12 +167,31 @@ const Calendar = () => {
 
 const App = () => {
 
+  const cableOptions = [
+    {
+      name: 'Laguuni ProCable',
+      id: 6,
+    },
+    {
+      name: 'Laguuni EasyCable',
+      id: 7,
+    }
+  ]
+
+  const [currentCableId, setCurrentCableId] = React.useState(cableOptions[0].id)
 
   return (
     <div className="content">
       <h1 className={'main-header'}>FREE SLOTS</h1>
-      <span className={'location-info'}>@Laguuni ProCable</span>
-      <Calendar/>
+      <div className={'tab-container'}>
+        {cableOptions.map((cableOption) => {
+          return <span
+            className={'location-info' + (cableOption.id === currentCableId ? ' selected' : '')}
+            onClick={() => {setCurrentCableId(cableOption.id)}}
+          >@{cableOption.name}</span>
+        })}
+      </div>
+      <Calendar key={currentCableId} cableId={currentCableId}/>
       <p>Made by Oskari Lehto</p>
       <p>Codes at <a href={'https://github.com/superosku/laguuni-fixer'}>github</a></p>
       <p>Comments and suggestions to <a href={'https://github.com/superosku/laguuni-fixer/issues'}>github issues</a></p>

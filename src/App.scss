@@ -35,12 +35,25 @@ $color4: rgb(196, 57, 40);
   font-family: Antonio;
 }
 
+.tab-container {
+  display: flex;
+}
+
 .location-info {
+  cursor: pointer;
+  margin-right: 15px;
   font-size: 20px;
   margin-bottom: 20px;
   display: block;
-  color: $textColor;
+  color: lighten($textColor, 50%);
   font-family: Antonio;
+
+  &:hover {
+    color: $textColor;
+  }
+  &.selected {
+    color: $textColor;
+  }
 }
 
 .table-container {
