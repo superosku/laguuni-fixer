@@ -26,12 +26,18 @@ const fetchForDate = async (date: string, cableId: number) => {
   }
 
   const slotsToCheck = [1, 2, 3, 4]
-  for (const slotIndex in slotsToCheck) {
-    const validStartTimes = await fetchForDateAndCount(
-      date, slotsToCheck[slotIndex].toString(), cableId
+
+  const allValidStartTimes = await Promise.all(slotsToCheck.map(slot => {
+    return fetchForDateAndCount(
+      date, slot.toString(), cableId
     )
+  }))
+
+  for (const i in slotsToCheck) {
+    const slot = slotsToCheck[i];
+    const validStartTimes = allValidStartTimes[i];
     for (const startTimeIndex in validStartTimes) {
-      freeTimeSlots[validStartTimes[startTimeIndex]] = slotsToCheck[slotIndex];
+      freeTimeSlots[validStartTimes[startTimeIndex]] = slot;
     }
   }
   return freeTimeSlots
@@ -90,7 +96,7 @@ const Calendar = ({ cableId }: ICalendarProps) => {
   React.useEffect(() => {
     (async () => {
       for (const dateIndex in dateStrings) {
-        await fetchAndSetForDate(dateStrings[dateIndex].date)
+        fetchAndSetForDate(dateStrings[dateIndex].date)
       }
     })()
   }, [])
@@ -169,13 +175,13 @@ const App = () => {
 
   const cableOptions = [
     {
-      name: 'Laguuni ProCable',
+      name: 'LaguuniPro',
       id: 6,
     },
     {
-      name: 'Laguuni EasyCable',
+      name: 'LaguuniEasy',
       id: 7,
-    }
+    },
   ]
 
   const [currentCableId, setCurrentCableId] = React.useState(cableOptions[0].id)
