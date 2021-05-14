@@ -61,7 +61,7 @@ interface ICalendarProps {
   cableId: number
 }
 
-const Calendar = ({ cableId }: ICalendarProps) => {
+const Calendar = ({cableId}: ICalendarProps) => {
   const dateFromIndex = (index: number) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
@@ -116,7 +116,7 @@ const Calendar = ({ cableId }: ICalendarProps) => {
     <table className={'main-table'}>
       <thead>
       <tr>
-        <th>
+        <th className={'sticky'}>
           <div className={'clock-container'}>
             <ClockIcon className={'clock'}/>
           </div>
@@ -134,17 +134,16 @@ const Calendar = ({ cableId }: ICalendarProps) => {
       </thead>
       <tbody>
       {allTimes.map((timeString, index) => {
-        return <tr>
-          <td>
+        return <tr className={'main-row'}>
+          <td className={'sticky'}>
             <span className={'time-info'}>
-            {timeString}
+              {timeString}
             </span>
           </td>
           {dateStrings.map(dateString => {
             const isLoaded = availabilityInfo[dateString.date] !== undefined
             const availableSlots = availabilityInfo[dateString.date] && availabilityInfo[dateString.date][timeString];
-            return <td
-            >
+            return <td>
               <div className={'color-container'}>
                 {isLoaded ?
                   availableSlots > 0 &&
@@ -198,7 +197,9 @@ const App = () => {
         {cableOptions.map((cableOption) => {
           return <span
             className={'location-info' + (cableOption.id === currentCableId ? ' selected' : '')}
-            onClick={() => {setCurrentCableId(cableOption.id)}}
+            onClick={() => {
+              setCurrentCableId(cableOption.id)
+            }}
           >@{cableOption.name}</span>
         })}
       </div>
