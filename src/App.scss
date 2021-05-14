@@ -11,6 +11,10 @@ $color4: rgb(196, 57, 40);
   src: local('Antonio'), url(./Antonio-Medium.ttf) format('truetype');
 }
 
+#root {
+  overflow-x: scroll;
+}
+
 .content {
   padding: 20px;
 }
