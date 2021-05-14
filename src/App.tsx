@@ -5,8 +5,8 @@ import './App.scss';
 const baseUrl = 'https://johku.com/laguuni/fi_FI/products'
 
 let allTimes: string[] = []
-for (let i = 0; i < 18; i++) {
-  const timeString = `${i + 6}.00`.padStart(5, '0')
+for (let i = 0; i < 14; i++) {
+  const timeString = `${i + 9}.00`.padStart(5, '0')
   allTimes.push(timeString)
 }
 
@@ -102,11 +102,12 @@ const Calendar = ({ cableId }: ICalendarProps) => {
   }, [])
 
   const addDate = () => {
-    const currentIndex = dateIndexes[dateIndexes.length - 1]
-    const newDateIndexes = [...dateIndexes, currentIndex + 1];
-    setDateIndexes(newDateIndexes)
-    console.log('settingDateIndexes', newDateIndexes)
-    fetchAndSetForDate(dateToIsoNoTimezone(dateFromIndex(currentIndex + 1)));
+    setDateIndexes(current => {
+      const currentIndex = current[current.length - 1]
+      const newDateIndexes = [...current, currentIndex + 1];
+      fetchAndSetForDate(dateToIsoNoTimezone(dateFromIndex(currentIndex + 1)));
+      return newDateIndexes
+    })
   }
 
   return <div
@@ -163,7 +164,11 @@ const Calendar = ({ cableId }: ICalendarProps) => {
       </tbody>
     </table>
     <div className={'more-container'}>
-      <button className={'more-button'} onClick={addDate}>
+      <button className={'more-button'} onClick={() => {
+        addDate()
+        addDate()
+        addDate()
+      }}>
         Show More
         <ChevronRightIcon className={'chevron'}/>
       </button>
