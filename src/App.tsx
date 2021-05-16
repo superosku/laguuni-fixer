@@ -188,22 +188,20 @@ const App = () => {
     },
   ]
 
-  const [currentCableId, setCurrentCableId] = React.useState(cableOptions[0].id)
-
   return (
     <div className="content">
       <h1 className={'main-header'}>FREE SLOTS</h1>
-      <div className={'tab-container'}>
+      <div>
+      {/*<div className={'tab-container'}>*/}
         {cableOptions.map((cableOption) => {
-          return <span
-            className={'location-info' + (cableOption.id === currentCableId ? ' selected' : '')}
-            onClick={() => {
-              setCurrentCableId(cableOption.id)
-            }}
-          >@{cableOption.name}</span>
+          return <div key={cableOption.id} className={'calendar-container'}>
+            <span
+              className={'location-info'}
+            >@{cableOption.name}</span>
+            <Calendar cableId={cableOption.id}/>
+          </div>
         })}
       </div>
-      <Calendar key={currentCableId} cableId={currentCableId}/>
       <p>Made by Oskari Lehto</p>
       <p>Codes at <a href={'https://github.com/superosku/laguuni-fixer'}>github</a></p>
       <p>Comments and suggestions to <a href={'https://github.com/superosku/laguuni-fixer/issues'}>github issues</a></p>
