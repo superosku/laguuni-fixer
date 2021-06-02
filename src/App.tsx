@@ -59,16 +59,16 @@ const dateToIsoNoTimezone = (date: Date) => {
 
 interface ICalendarProps {
   cableId: number
+  dateIndexes: number[]
+  setDateIndexes: (arg1: number[] | ((current: number[]) => number[])) => void
 }
 
-const Calendar = ({cableId}: ICalendarProps) => {
+const Calendar = ({cableId, dateIndexes, setDateIndexes}: ICalendarProps) => {
   const dateFromIndex = (index: number) => {
     const date = new Date();
     date.setDate(date.getDate() + index);
     return date
   }
-
-  const [dateIndexes, setDateIndexes] = React.useState([0, 1, 2, 3, 4]);
 
   const dateStrings = React.useMemo(() => {
     const value = dateIndexes.map(dayId => {
@@ -85,6 +85,11 @@ const Calendar = ({cableId}: ICalendarProps) => {
   const [availabilityInfo, setAvailabilityInfo] = React.useState<any>({});
 
   const fetchAndSetForDate = async (date: string) => {
+    setAvailabilityInfo((oldInfo: any) => {
+      let newInfo = {...oldInfo};
+      newInfo[date] = null; // Setting this to null before the await stuff, so that nothing is fetched twice
+      return newInfo
+    })
     const dateInfo = await fetchForDate(date, cableId);
     setAvailabilityInfo((oldInfo: any) => {
       let newInfo = {...oldInfo};
@@ -96,16 +101,22 @@ const Calendar = ({cableId}: ICalendarProps) => {
   React.useEffect(() => {
     (async () => {
       for (const dateIndex in dateStrings) {
-        fetchAndSetForDate(dateStrings[dateIndex].date)
+        const dateString = dateStrings[dateIndex].date
+        // undefined = not set to fetch
+        // null = set to fetch but not ready
+        // object = fully fetched
+        if (availabilityInfo[dateString] === undefined) {
+          fetchAndSetForDate(dateString)
+        }
       }
     })()
-  }, [])
+  }, [dateStrings])
 
   const addDate = () => {
     setDateIndexes(current => {
       const currentIndex = current[current.length - 1]
       const newDateIndexes = [...current, currentIndex + 1];
-      fetchAndSetForDate(dateToIsoNoTimezone(dateFromIndex(currentIndex + 1)));
+      // fetchAndSetForDate(dateToIsoNoTimezone(dateFromIndex(currentIndex + 1)));
       return newDateIndexes
     })
   }
@@ -122,7 +133,7 @@ const Calendar = ({cableId}: ICalendarProps) => {
           </div>
         </th>
         {dateStrings.map(dateString => {
-          return <th>
+          return <th key={dateString.date}>
             <div className={'date-header'}>
               <span>{dateString.day}</span>
               <span>{dateString.formatted}</span>
@@ -134,16 +145,16 @@ const Calendar = ({cableId}: ICalendarProps) => {
       </thead>
       <tbody>
       {allTimes.map((timeString, index) => {
-        return <tr className={'main-row'}>
+        return <tr className={'main-row'} key={timeString}>
           <td className={'sticky'}>
             <span className={'time-info'}>
               {timeString}
             </span>
           </td>
           {dateStrings.map(dateString => {
-            const isLoaded = availabilityInfo[dateString.date] !== undefined
+            const isLoaded = availabilityInfo[dateString.date] !== undefined && availabilityInfo[dateString.date] !== null
             const availableSlots = availabilityInfo[dateString.date] && availabilityInfo[dateString.date][timeString];
-            return <td>
+            return <td key={dateString.date}>
               <div className={'color-container'}>
                 {isLoaded ?
                   availableSlots > 0 &&
@@ -175,30 +186,55 @@ const Calendar = ({cableId}: ICalendarProps) => {
   </div>
 }
 
+interface ICableOption {
+  name: string
+  id: number
+  link: string
+}
+
 const App = () => {
 
-  const cableOptions = [
+  const cableOptions: ICableOption[] = [
     {
       name: 'LaguuniPro',
       id: 6,
+      link: 'https://shop.laguuniin.fi/fi_FI/wakeboarding/wakeboarding-pro-kaapeli'
     },
     {
       name: 'LaguuniEasy',
       id: 7,
+      link: 'https://shop.laguuniin.fi/fi_FI/wakeboarding/wakeboarding-easy-kaapeli'
+    },
+    {
+      name: 'LaguuniHietsu',
+      id: 157,
+      link: 'https://shop.laguuniin.fi/fi_FI/wakeboarding-hietsu/wakeboarding-hietsun-kaapeli'
     },
   ]
+
+  const [dateIndexes, setDateIndexes] = React.useState([0, 1, 2, 3, 4]);
 
   return (
     <div className="content">
       <h1 className={'main-header'}>FREE SLOTS</h1>
       <div>
-      {/*<div className={'tab-container'}>*/}
         {cableOptions.map((cableOption) => {
           return <div key={cableOption.id} className={'calendar-container'}>
             <span
               className={'location-info'}
             >@{cableOption.name}</span>
-            <Calendar cableId={cableOption.id}/>
+            <Calendar
+              cableId={cableOption.id}
+              dateIndexes={dateIndexes}
+              setDateIndexes={setDateIndexes}
+            />
+            <div className={'relative'}>
+            <a
+              className={'reserve-button'}
+              href={cableOption.link}
+              target="_blank"
+            >Reserve {cableOption.name}</a>
+            </div>
           </div>
         })}
       </div>

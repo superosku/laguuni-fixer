@@ -17,22 +17,12 @@ $color4: rgb(196, 57, 40);
 
 .content {
   padding: 20px;
+  display: inline-block;
 }
 
 .calendar-container {
   margin-bottom: 30px;
 }
-
-//h1 {
-//  margin: 0;
-//  padding-bottom: 20px;
-//  font-size: 50px;
-//}
-
-//.main-info {
-//  display: block;
-//  margin-bottom: 20px;
-//}
 
 .main-header {
   font-size: 50px;
@@ -48,10 +38,14 @@ $color4: rgb(196, 57, 40);
 }
 
 .location-info {
+  left: 10px;
+  position: sticky;
+
   margin-right: 15px;
   font-size: 20px;
   margin-bottom: 20px;
-  display: block;
+  display: inline-block;
+
   color: $textColor;
   font-family: Antonio;
 }
@@ -119,8 +113,6 @@ body {
 
 table.main-table {
   background-color: #ffffff;
-  //width: 100%;
-  //border: none;
 
   border-collapse: collapse;
   border: 1px solid $borderColor;
@@ -134,8 +126,6 @@ table.main-table {
   }
 
   .main-row {
-    //line-height: 18px;
-
     .sticky .time-info {
       height: 38px;
       display: flex;
@@ -241,5 +231,26 @@ table.main-table {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+.reserve-button {
+  left: 10px;
+  position: sticky;
+
+  display: block;
+  padding: 10px;
+  width: 150px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 5px;
+  background-color: $color1;
+  font-weight: bold;
+  color: white;
+  margin-top: 20px;
+
+  transition: 150ms ease-in-out;
+  &:hover {
+    background-color: mix($color1, black, 80%);
   }
 }
